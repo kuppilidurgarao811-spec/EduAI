@@ -1,0 +1,11 @@
+{
+  "name": "EduAI",
+  "description": "AI-powered education platform providing personalized learning from LKG to Degree level, competitive exam prep, AI tutors, multi-role dashboards, and multi-lingual support.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
