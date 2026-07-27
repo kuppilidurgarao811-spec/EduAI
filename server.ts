@@ -66,6 +66,12 @@ Your guidelines:
       systemInstruction += `\nMode: Generate a 5-question multiple choice quiz with detailed answers and explanations for level ${educationLevel}. Format response cleanly.`;
     } else if (mode === "notes") {
       systemInstruction += `\nMode: Generate concise, highly structured revision notes with Key Concepts, Formulas/Definitions, and 3 Quick Practice Questions.`;
+    } else if (mode === "advanced") {
+      systemInstruction += `\nMode: ADVANCED DEEP EXPLANATION (PREMIUM MASTER MODE). Provide a rigorous, multi-angle breakdown:
+      1. Step-by-Step Mathematical/Scientific Derivation or Proof.
+      2. Intuitive Real-World Analogy & Practical Application.
+      3. Key Formula Box / Definition Sheet.
+      4. High-Yield Exam Strategy & Common Mistakes to Avoid for ${educationLevel} Board & Entrance Exams.`;
     }
 
     // Build chat contents from history if available
@@ -135,6 +141,12 @@ Your guidelines:
       systemInstruction += `\nMode: Generate a 5-question multiple choice quiz with detailed answers.`;
     } else if (mode === "notes") {
       systemInstruction += `\nMode: Generate concise, highly structured revision notes with Key Concepts & Formulas.`;
+    } else if (mode === "advanced") {
+      systemInstruction += `\nMode: ADVANCED DEEP EXPLANATION (PREMIUM MASTER MODE). Provide a rigorous, multi-angle breakdown:
+      1. Step-by-Step Mathematical/Scientific Derivation or Proof.
+      2. Intuitive Real-World Analogy & Practical Application.
+      3. Key Formula Box / Definition Sheet.
+      4. High-Yield Exam Strategy & Common Mistakes to Avoid for ${educationLevel} Board & Entrance Exams.`;
     }
 
     const contents: any[] = [];
@@ -475,8 +487,49 @@ app.post("/api/ai/tools", async (req, res) => {
     let systemInstruction = `You are EduAI Specialized AI Assistant. Language: ${language || "English"}. Level: ${educationLevel || "General"}.`;
 
     switch (tool) {
+      case "notes_generator":
+        prompt = `Generate concise, high-yield AI study notes for topic: "${inputs.topic || inputs.problem}". Subject: ${inputs.subject || "General"}. Level: ${educationLevel}.
+Structure into:
+1. 📌 **Key Concepts & Summary**
+2. 💡 **Important Formulas & Definitions**
+3. 📝 **Exam-Oriented Highlights & Tips**
+4. ❓ **3 Quick Self-Assessment Questions**`;
+        break;
+      case "flashcards_generator":
+        prompt = `Generate 5 interactive flashcards for topic: "${inputs.topic || inputs.problem}".
+Format clearly as 5 numbered cards:
+Card 1: [QUESTION / FRONT] ... | [ANSWER / BACK] ...
+Card 2: [QUESTION / FRONT] ... | [ANSWER / BACK] ...
+Card 3: [QUESTION / FRONT] ... | [ANSWER / BACK] ...
+Card 4: [QUESTION / FRONT] ... | [ANSWER / BACK] ...
+Card 5: [QUESTION / FRONT] ... | [ANSWER / BACK] ...`;
+        break;
+      case "code_practice":
+        prompt = `Generate a coding practice problem for topic/language: "${inputs.topic || inputs.codeLanguage || "Python DSA"}". Level: ${educationLevel}.
+Include:
+1. 🎯 **Problem Statement**
+2. 📥 **Sample Inputs & Outputs**
+3. 💡 **Hints & Algorithm Strategy**
+4. 💻 **Optimal Solution with Comments**
+5. ⏱️ **Time & Space Complexity**`;
+        break;
+      case "placement_prep":
+        prompt = `Generate a comprehensive Placement & Aptitude Preparation Guide for target company/role: "${inputs.targetRole || inputs.field || "Software Engineer / IT Placement"}".
+Include:
+1. 🧠 **Top Quantitative Aptitude & Logical Reasoning Questions with Solutions**
+2. 💻 **Core Technical MCQs (Data Structures, OS, DBMS, Networks)**
+3. 🗣️ **HR & Managerial Discussion Preparation Strategies**
+4. 📈 **30-Day Placement Readiness Roadmap**`;
+        break;
       case "homework_solver":
-        prompt = `Solve this homework problem step-by-step: ${inputs.problem}. Include formula, step-by-step substitution, reason for each step, and clear boxed final answer.`;
+        prompt = `Solve this homework problem step-by-step: ${inputs.problem}.
+Language requested: ${language || "English"}.
+Level requested: ${educationLevel || "General"}.
+
+Please structure your output into 3 clear, highly scannable sections:
+1. 💡 **Concept Explained Simply**: Explain the underlying concept, rule, or theorem in plain, simple, friendly terms (explain like I'm learning it for the first time).
+2. 📝 **Step-by-Step Solution**: Show every calculation step, formula, and step-by-step substitution clearly numbered (Step 1, Step 2, etc.).
+3. 🎯 **Final Answer**: Highlight the exact final answer clearly.`;
         break;
       case "essay_writer":
         prompt = `Write a well-structured essay on topic: "${inputs.topic}". Target word count: ${inputs.wordCount || 300}. Key points to include: ${inputs.keyPoints || "Standard introduction, body paragraphs, and conclusion"}. Style: ${inputs.style || "Academic"}.`;

@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profiles & Complete Learning Data",
+      "description": "User profile, learning progress, quiz scores, bookmarks, chat history, and downloaded courses stored by auth UID",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "mobile": { "type": "string" },
+        "role": { "type": "string" },
+        "avatar": { "type": "string" },
+        "educationLevel": { "type": "string" },
+        "streak": { "type": "number" },
+        "xp": { "type": "number" },
+        "savedBookmarks": { "type": "array", "items": { "type": "string" } },
+        "learningProgress": {
+          "type": "object",
+          "properties": {
+            "completedModules": { "type": "array", "items": { "type": "string" } },
+            "studyPlans": { "type": "array" }
+          }
+        },
+        "quizScores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "testId": { "type": "string" },
+              "score": { "type": "number" },
+              "date": { "type": "string" }
+            }
+          }
+        },
+        "chatHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "role": { "type": "string" },
+              "text": { "type": "string" },
+              "timestamp": { "type": "string" }
+            }
+          }
+        },
+        "downloadedCourses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "type": { "type": "string" },
+              "size": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["id", "email", "name", "role"]
+    }
+  }
+}
