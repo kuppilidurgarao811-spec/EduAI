@@ -382,69 +382,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  // Sync User Profile & Stats to Firestore
+  // Sync User Profile & Stats to Firestore with debouncing
   useEffect(() => {
     localStorage.setItem('eduai_user', JSON.stringify({ ...user, role, educationLevel }));
-    if (auth.currentUser) {
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, {
-        id: auth.currentUser.uid,
-        name: user.name,
-        email: user.email,
-        role: role,
-        avatar: user.avatar,
-        educationLevel: educationLevel,
-        streak: user.streak,
-        xp: user.xp,
-        updatedAt: new Date().toISOString(),
-      }, { merge: true }).catch(err => console.warn('Sync profile to firestore failed:', err));
-    }
+    const timer = setTimeout(() => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        setDoc(userDocRef, {
+          id: auth.currentUser.uid,
+          name: user.name,
+          email: user.email,
+          role: role,
+          avatar: user.avatar,
+          educationLevel: educationLevel,
+          streak: user.streak,
+          xp: user.xp,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true }).catch(err => console.warn('Sync profile to firestore failed:', err));
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [user, role, educationLevel]);
 
-  // Sync Chat History to Firestore
+  // Sync Chat History to Firestore with debouncing
   useEffect(() => {
     localStorage.setItem('eduai_chat_history', JSON.stringify(chatHistory));
-    if (auth.currentUser) {
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, {
-        chatHistory: chatHistory.slice(-50), // keep recent 50 messages in firestore
-      }, { merge: true }).catch(err => console.warn('Sync chat history to firestore failed:', err));
-    }
+    const timer = setTimeout(() => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        setDoc(userDocRef, {
+          chatHistory: chatHistory.slice(-50), // keep recent 50 messages in firestore
+        }, { merge: true }).catch(err => console.warn('Sync chat history to firestore failed:', err));
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
   }, [chatHistory]);
 
-  // Sync Bookmarks to Firestore
+  // Sync Bookmarks to Firestore with debouncing
   useEffect(() => {
-    if (auth.currentUser) {
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, {
-        savedBookmarks: bookmarks,
-      }, { merge: true }).catch(err => console.warn('Sync bookmarks to firestore failed:', err));
-    }
+    const timer = setTimeout(() => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        setDoc(userDocRef, {
+          savedBookmarks: bookmarks,
+        }, { merge: true }).catch(err => console.warn('Sync bookmarks to firestore failed:', err));
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [bookmarks]);
 
-  // Sync Downloaded Courses (Offline Items) to Firestore
+  // Sync Downloaded Courses (Offline Items) to Firestore with debouncing
   useEffect(() => {
     localStorage.setItem('eduai_offline_items', JSON.stringify(offlineItems));
-    if (auth.currentUser) {
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, {
-        downloadedCourses: offlineItems,
-      }, { merge: true }).catch(err => console.warn('Sync downloaded courses to firestore failed:', err));
-    }
+    const timer = setTimeout(() => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        setDoc(userDocRef, {
+          downloadedCourses: offlineItems,
+        }, { merge: true }).catch(err => console.warn('Sync downloaded courses to firestore failed:', err));
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [offlineItems]);
 
-  // Sync Learning Progress & Study Plans to Firestore
+  // Sync Learning Progress & Study Plans to Firestore with debouncing
   useEffect(() => {
     localStorage.setItem('eduai_study_plans', JSON.stringify(studyPlans));
-    if (auth.currentUser) {
-      const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      setDoc(userDocRef, {
-        learningProgress: {
-          studyPlans: studyPlans,
-          lastUpdated: new Date().toISOString(),
-        }
-      }, { merge: true }).catch(err => console.warn('Sync study plans to firestore failed:', err));
-    }
+    const timer = setTimeout(() => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        setDoc(userDocRef, {
+          learningProgress: {
+            studyPlans: studyPlans,
+            lastUpdated: new Date().toISOString(),
+          }
+        }, { merge: true }).catch(err => console.warn('Sync study plans to firestore failed:', err));
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
   }, [studyPlans]);
 
   useEffect(() => {
