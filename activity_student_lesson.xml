@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Header: Simple Linear Regression -->
+        <TextView
+            android:id="@+id/txtLessonTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Simple Linear Regression"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginBottom="12dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E2E8F0"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Subtitle / Intro -->
+        <TextView
+            android:id="@+id/txtLessonSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Introduction"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#334155"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Content -->
+        <TextView
+            android:id="@+id/txtLessonContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Linear regression is a foundational supervised learning algorithm used to model the relationship between a scalar response and one or more explanatory variables..."
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#475569"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- 📄 Study Material Header -->
+        <TextView
+            android:id="@+id/txtStudyMaterialHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📄 Study Material"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#0F172A"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- [ OPEN PDF ] Button -->
+        <Button
+            android:id="@+id/btnOpenPdf"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="OPEN PDF"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:backgroundTint="#4F46E5"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 🎬 [ WATCH VIDEO ] Button - Video LMS -->
+        <Button
+            android:id="@+id/btnWatchVideo"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="🎬 WATCH VIDEO"
+            android:textStyle="bold"
+            android:backgroundTint="#2563EB"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 🤖 Ask AI Button -->
+        <Button
+            android:id="@+id/btnAskAi"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="🤖 Ask AI"
+            android:textStyle="bold"
+            android:backgroundTint="#7C3AED"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 📝 Take Quiz Button -->
+        <Button
+            android:id="@+id/btnTakeQuiz"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="📝 Take Quiz"
+            android:textStyle="bold"
+            android:backgroundTint="#059669"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

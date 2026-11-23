@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
+import { EducationManagement } from './EducationManagement';
+import { LessonEditor } from './LessonEditor';
+import { QuizManager } from './QuizManager';
+import { ContentManagementArchitecture } from './ContentManagementArchitecture';
+import { ChapterManagement } from './ChapterManagement';
+import { LessonManagement } from './LessonManagement';
 import {
   ShieldAlert,
   Users,
   BookOpen,
   Video,
   FileText,
+  HelpCircle,
   Bell,
   BarChart3,
   Search,
@@ -44,8 +51,11 @@ import {
   MessageSquare,
   Flame,
   ThumbsUp,
+  Zap,
 } from 'lucide-react';
 import { analytics } from '../lib/analytics';
+import { PlatformScaling } from './PlatformScaling';
+import { MarketingHub } from './MarketingHub';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -120,8 +130,8 @@ export const AdminPanel: React.FC = () => {
     downloadOfflineItem,
   } = useAuth();
 
-  // Primary Tab state: 'analytics' | 'users' | 'courses' | 'uploads' | 'notifications' | 'publish' | 'feedback_updates'
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'courses' | 'uploads' | 'notifications' | 'publish' | 'feedback_updates'>('analytics');
+  // Primary Tab state
+  const [activeTab, setActiveTab] = useState<'content_architecture' | 'chapter_management' | 'lesson_management' | 'lesson_editor' | 'quiz_manager' | 'education_management' | 'analytics' | 'users' | 'courses' | 'uploads' | 'notifications' | 'publish' | 'feedback_updates' | 'platform_scaling' | 'marketing_growth'>('lesson_management');
   const [publishCopied, setPublishCopied] = useState<string | null>(null);
   const [checklistCompleted, setChecklistCompleted] = useState<Record<string, boolean>>({
     signed_build: true,
@@ -491,6 +501,84 @@ export const AdminPanel: React.FC = () => {
       <div className="flex items-center gap-2 p-2 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/80 dark:border-slate-700/80 shadow-inner overflow-x-auto no-scrollbar">
         <button
           type="button"
+          onClick={() => setActiveTab('content_architecture')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'content_architecture'
+              ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white shadow-md ring-2 ring-indigo-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'
+          }`}
+        >
+          <Layers className="w-4 h-4 text-cyan-300" />
+          <span>13. Content Architecture (Pipeline)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('chapter_management')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'chapter_management'
+              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md ring-2 ring-purple-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-purple-600'
+          }`}
+        >
+          <Layers className="w-4 h-4 text-amber-300" />
+          <span>Implementation 1 — Chapter Management</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('lesson_management')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'lesson_management'
+              ? 'bg-gradient-to-r from-emerald-600 via-indigo-600 to-purple-600 text-white shadow-md ring-2 ring-emerald-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-emerald-600'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-emerald-300" />
+          <span>Implementation 2 — Lesson Management</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('lesson_editor')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'lesson_editor'
+              ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-md ring-2 ring-indigo-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-amber-300" />
+          <span>Lesson Editor (Create Lesson)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('quiz_manager')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'quiz_manager'
+              ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 text-white shadow-md ring-2 ring-purple-400'
+              : 'text-slate-600 dark:text-slate-300 hover:text-purple-600'
+          }`}
+        >
+          <HelpCircle className="w-4 h-4 text-amber-300" />
+          <span>Quiz Builder (Create Quiz)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('education_management')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'education_management'
+              ? 'bg-gradient-to-r from-emerald-600 via-indigo-600 to-purple-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'
+          }`}
+        >
+          <BookOpen className="w-4 h-4 text-amber-300" />
+          <span>Education Management (Add Subject)</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('analytics')}
           className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'analytics'
@@ -581,7 +669,66 @@ export const AdminPanel: React.FC = () => {
           <History className="w-4 h-4" />
           <span>Feedback & Version Updates</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('platform_scaling')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'platform_scaling'
+              ? 'bg-gradient-to-r from-amber-600 to-indigo-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-300 hover:text-indigo-600'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span className="flex items-center gap-1">
+            Platform Scaling & Cloud <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black">Phase 20</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('marketing_growth')}
+          className={`py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'marketing_growth'
+              ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-300 hover:text-rose-600'
+          }`}
+        >
+          <Zap className="w-4 h-4" />
+          <span className="flex items-center gap-1">
+            Marketing & ASO <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">Phase 21</span>
+          </span>
+        </button>
       </div>
+
+      {/* ==================== TAB -2: 13. CONTENT ARCHITECTURE & PIPELINE ==================== */}
+      {activeTab === 'content_architecture' && <ContentManagementArchitecture />}
+
+      {/* ==================== TAB: IMPLEMENTATION 1 — CHAPTER MANAGEMENT ==================== */}
+      {activeTab === 'chapter_management' && (
+        <ChapterManagement
+          onNavigateToLessons={(subjectName, chapterTitle) => {
+            setActiveTab('lesson_management');
+          }}
+        />
+      )}
+
+      {/* ==================== TAB: IMPLEMENTATION 2 — LESSON MANAGEMENT ==================== */}
+      {activeTab === 'lesson_management' && (
+        <LessonManagement
+          onNavigateToChapter={() => setActiveTab('chapter_management')}
+          onNavigateToQuiz={() => setActiveTab('quiz_manager')}
+        />
+      )}
+
+      {/* ==================== TAB -1: LESSON EDITOR (PRIMARY ADMIN SCREEN) ==================== */}
+      {activeTab === 'lesson_editor' && <LessonEditor />}
+
+      {/* ==================== TAB -0.5: QUIZ BUILDER (CREATE QUIZ SCREEN) ==================== */}
+      {activeTab === 'quiz_manager' && <QuizManager />}
+
+      {/* ==================== TAB 0: EDUCATION MANAGEMENT (ADD SUBJECT) ==================== */}
+      {activeTab === 'education_management' && <EducationManagement />}
 
       {/* ==================== TAB 1: ANALYTICS & INSIGHTS ==================== */}
       {activeTab === 'analytics' && (
@@ -1945,6 +2092,12 @@ Download EduAI today and supercharge your academic success!`;
           </div>
         </div>
       )}
+
+      {/* ==================== TAB: PLATFORM SCALING & CLOUD (PHASE 20) ==================== */}
+      {activeTab === 'platform_scaling' && <PlatformScaling />}
+
+      {/* ==================== TAB: MARKETING, ASO & GROWTH (PHASE 21) ==================== */}
+      {activeTab === 'marketing_growth' && <MarketingHub />}
 
       {/* --- MODAL 1: PUBLISH NEW VERSION UPDATE --- */}
       {showNewReleaseModal && (

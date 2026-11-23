@@ -1,16 +1,129 @@
+export interface SubjectDocument {
+  id?: string;
+  name: string;
+  level: string;
+  class?: string;
+  course?: string;
+  semester?: number;
+  language: Language | string;
+  description?: string;
+  icon?: string;
+  isActive: boolean;
+}
+
+export interface FirestoreSubject {
+  id: string;
+  name: string;
+  educationLevel: string;
+  courseClass: string;
+  semester?: string;
+  description: string;
+  icon?: string;
+  language?: string;
+  chapters?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+  }>;
+  lessons?: Array<{
+    id: string;
+    title: string;
+    durationMinutes?: number;
+    summary?: string;
+  }>;
+  videos?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    durationMinutes?: number;
+  }>;
+  pdfs?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    sizeMb?: string;
+  }>;
+  quizQuestions?: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+  }>;
+}
+
+export interface ChapterDocument {
+  id: string;
+  subjectId: string;
+  title: string;
+  description: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: any; // Firestore Timestamp | ISO string | FieldValue
+  updatedAt?: any;
+  subjectName?: string;
+  estimatedHours?: number;
+  topics?: string[];
+  lessonCount?: number;
+}
+
+export interface PublishedSubject {
+  id: string;
+  name: string;
+  code?: string;
+  subjectCode?: string;
+  levelId?: string;
+  courseId?: string;
+  className?: string;
+  yearOrClass?: string;
+  level?: string;
+  classOrCourse?: string;
+  course?: string;
+  semester?: number;
+  description: string;
+  language?: string;
+  order?: number;
+  displayOrder?: number;
+  isActive: boolean;
+  createdAt?: string;
+  createdBy?: string;
+  icon?: string;
+  chapters?: any[];
+  lessons?: any[];
+  videos?: any[];
+  pdfs?: any[];
+  quizQuestions?: any[];
+}
+
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
 
 export type EducationLevel =
   | 'LKG'
   | 'UKG'
+  | 'Primary School'
   | 'Class 1–5'
+  | 'High School'
   | 'Class 6–10'
+  | 'Intermediate'
   | 'Intermediate (11–12)'
-  | 'Diploma'
+  | 'Degree'
   | 'Degree (BSc, BCom, BA, BTech)'
+  | 'Diploma'
   | 'Competitive Exams (UPSC, APPSC, Banking, Railways)';
 
-export type Language = 'English' | 'Telugu' | 'Hindi';
+export type Language =
+  | 'English'
+  | 'Telugu'
+  | 'Hindi'
+  | 'Tamil'
+  | 'Kannada'
+  | 'Malayalam'
+  | 'Marathi'
+  | 'Bengali'
+  | 'Gujarati'
+  | 'Odia'
+  | 'Punjabi'
+  | 'Urdu';
 
 export interface User {
   id: string;
@@ -143,6 +256,57 @@ export interface ReminderSettings {
   soundAlerts: boolean;
 }
 
+export interface Chapter {
+  id: string;
+  subjectId: string;
+  title: string;
+  description: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+export interface Lesson {
+  id: string;
+  lessonId?: string;
+  chapterId: string;
+  subjectId?: string;
+  subjectTitle?: string;
+  chapterTitle?: string;
+  title: string;
+  description: string;
+  content: string;
+  order: number;
+  isActive: boolean;
+  isPublished: boolean;
+  status?: 'draft' | 'published' | 'archived';
+  // Preparation for PDF
+  pdfUrl?: string | null;
+  pdfPath?: string | null;
+  pdfName?: string | null;
+  pdfSize?: string | null;
+  pdfStoragePath?: string | null;
+  pdfPagesCount?: number;
+  // Preparation for Video
+  videoUrl?: string | null;
+  videoPath?: string | null;
+  videoName?: string | null;
+  videoDuration?: string | null;
+  videoStoragePath?: string | null;
+  thumbnailUrl?: string | null;
+  thumbnailStoragePath?: string | null;
+  // Preparation for Quiz
+  hasQuiz?: boolean;
+  quizId?: string | null;
+  quizTitle?: string | null;
+  quizQuestionsCount?: number;
+  // Metadata
+  estimatedMinutes?: number;
+  authorEmail?: string;
+  createdAt?: string;
+  updatedAt?: any;
+}
+
 export type OfflineItemType = 'lesson' | 'pdf' | 'video';
 
 export interface OfflineItem {
@@ -264,4 +428,309 @@ export interface PrivacySettings {
   incognitoMode: boolean;
 }
 
+export interface Teacher {
+  id: string;
+  name: string;
+  title: string;
+  avatar: string;
+  subject: string;
+  educationLevel: EducationLevel;
+  rating: number;
+  studentsCount: number;
+  followersCount: number;
+  isFollowing?: boolean;
+  bio: string;
+  verified: boolean;
+  recentMaterialsCount: number;
+  email?: string;
+}
 
+export interface StudyGroup {
+  id: string;
+  name: string;
+  description: string;
+  subject: string;
+  educationLevel: EducationLevel;
+  membersCount: number;
+  maxMembers: number;
+  isJoined?: boolean;
+  hostName: string;
+  hostAvatar: string;
+  meetingSchedule: string;
+  nextSessionTopic: string;
+  chatLink?: string;
+  tags: string[];
+}
+
+export interface DiscussionGroup {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  educationLevel: EducationLevel;
+  membersCount: number;
+  postsCount: number;
+  isJoined?: boolean;
+  icon: string;
+  activeTopic: string;
+  lastActive: string;
+}
+
+export type CareerTab = 'resume' | 'interview' | 'coding' | 'placement' | 'internships' | 'jobs';
+
+export interface ResumeData {
+  fullName: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedin: string;
+  github: string;
+  portfolio: string;
+  summary: string;
+  education: {
+    institution: string;
+    degree: string;
+    fieldOfStudy: string;
+    startDate: string;
+    endDate: string;
+    grade: string;
+  }[];
+  experience: {
+    title: string;
+    company: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+    highlights: string[];
+  }[];
+  projects: {
+    title: string;
+    technologies: string;
+    link: string;
+    description: string;
+  }[];
+  skills: string[];
+  certifications: string[];
+  achievements: string[];
+}
+
+export interface InterviewRole {
+  id: string;
+  title: string;
+  category: 'Tech' | 'Core' | 'Government' | 'Management' | 'Banking';
+  icon: string;
+  sampleQuestionsCount: number;
+}
+
+export interface InterviewQuestion {
+  id: string;
+  roleId: string;
+  question: string;
+  category: 'Technical' | 'Behavioral' | 'System Design' | 'HR';
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  hints: string[];
+  sampleAnswer: string;
+}
+
+export interface CodingProblem {
+  id: string;
+  title: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  category: 'Array & String' | 'Linked List' | 'Trees & Graphs' | 'Dynamic Programming' | 'SQL & Databases';
+  acceptanceRate: string;
+  description: string;
+  examples: {
+    input: string;
+    output: string;
+    explanation?: string;
+  }[];
+  constraints: string[];
+  starterCode: Record<string, string>; // e.g. { python: "...", cpp: "...", java: "...", javascript: "..." }
+  testCases: { input: string; expectedOutput: string }[];
+  solutionHints: string[];
+  fullSolution: Record<string, string>;
+}
+
+export interface PlacementTrack {
+  id: string;
+  companyName: string;
+  logo: string;
+  category: 'IT Service' | 'Product Tech' | 'Core Engineering' | 'Government/Banking';
+  targetRoles: string[];
+  salaryPackage: string;
+  selectionRounds: string[];
+  examPattern: {
+    section: string;
+    questionsCount: number;
+    timeMinutes: number;
+  }[];
+  prepMaterialsCount: number;
+  syllabus: string[];
+  previousYearQuestionsCount: number;
+}
+
+export interface InternshipListing {
+  id: string;
+  title: string;
+  company: string;
+  logo: string;
+  location: string;
+  workMode: 'Remote' | 'On-Site' | 'Hybrid';
+  stipend: string;
+  duration: string;
+  startDate: string;
+  postedDate: string;
+  deadline: string;
+  skillsRequired: string[];
+  description: string;
+  openings: number;
+  applied?: boolean;
+}
+
+export interface JobUpdate {
+  id: string;
+  title: string;
+  organization: string;
+  category: 'IT & Software' | 'Core Engineering' | 'Government Exam' | 'Banking & Railway' | 'PSU';
+  location: string;
+  eligibility: string;
+  salaryOrPayScale: string;
+  batchEligible: string;
+  postedDate: string;
+  lastDateToApply: string;
+  officialNotificationUrl: string;
+  isGovernment: boolean;
+  totalVacancies?: number;
+  urgentHiring?: boolean;
+}
+
+export interface QuizDocument {
+  id?: string;
+  subjectId: string;
+  chapterId: string;
+  lessonId: string;
+  lessonTitle?: string;
+  subjectTitle?: string;
+  chapterTitle?: string;
+  title: string;
+  description?: string;
+  totalMarks: number;
+  passMarks: number;
+  durationMinutes: number;
+  timeLimit?: number; // legacy alias for durationMinutes
+  passingScore?: number; // derived pass percentage
+  questionsCount?: number;
+  isPublished: boolean;
+  isActive: boolean;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
+// Student-safe question stored at quizzes/{quizId}/questions/{questionId} (NO correctOptionIndex)
+export interface QuizQuestionItem {
+  id: string;
+  questionText: string;
+  options: string[];
+  marks: number;
+  order: number;
+  isPublished?: boolean;
+  isActive?: boolean;
+}
+
+// Protected answer key stored separately at quizzes/{quizId}/answerKeys/{questionId}
+export interface QuizAnswerKey {
+  id?: string;
+  correctOptionIndex: 0 | 1 | 2 | 3;
+  explanation?: string;
+}
+
+// Persisted student quiz attempt stored at quizAttempts/{attemptId}
+export interface QuizAttemptDocument {
+  id?: string;
+  quizId: string;
+  subjectId?: string;
+  chapterId?: string;
+  lessonId?: string;
+  quizTitle?: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  score: number;
+  totalMarks: number;
+  passMarks?: number;
+  percentage: number;
+  passed: boolean;
+  answers?: Record<string, number>;
+  graded?: boolean;
+  timeSpentSeconds?: number;
+  submittedAt?: any;
+}
+
+// Legacy flat quiz interfaces (preserved for backward compatibility)
+export interface QuizQuestionDocument {
+  id?: string;
+  quizId: string;
+  order?: number;
+  isPublished?: boolean;
+  question: string;
+  optionA: string;
+  optionB: string;
+  optionC?: string;
+  optionD?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  explanation?: string;
+}
+
+export interface QuizResultDocument {
+  id?: string;
+  quizId: string;
+  lessonId?: string;
+  quizTitle: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  score: number;
+  totalQuestions: number;
+  percentage: number;
+  passingScore: number;
+  passed: boolean;
+  answers: Record<string, 'A' | 'B' | 'C' | 'D'>;
+  timeSpentSeconds?: number;
+  submittedAt?: any;
+}
+
+export interface StudentProgress {
+  id?: string;
+  progressId?: string;
+  userId: string;
+  subjectId: string;
+  chapterId: string;
+  lessonId: string;
+  completed: boolean;
+  percentage: number;
+  completedAt?: any;
+}
+
+export interface ChapterProgressSummary {
+  chapterId: string;
+  chapterNumber: number;
+  title: string;
+  percentage: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessons: {
+    id: string;
+    title: string;
+    completed: boolean;
+    percentage: number;
+    completedAt?: string | null;
+  }[];
+}
+
+export interface SubjectProgressSummary {
+  subjectId: string;
+  subjectName: string;
+  icon?: string;
+  overallPercentage: number;
+  chapters: ChapterProgressSummary[];
+}

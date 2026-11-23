@@ -20,6 +20,15 @@ import { OfflineVault } from './components/OfflineVault';
 import { CommunityForum } from './components/CommunityForum';
 import { AdminPanel } from './components/AdminPanel';
 import { SettingsComponent } from './components/Settings';
+import { CareerHub } from './components/CareerHub';
+import { MarketingHub } from './components/MarketingHub';
+import { SystemArchitecture } from './components/SystemArchitecture';
+import { CurriculumHierarchy } from './components/CurriculumHierarchy';
+import { StudentLessonScreen } from './components/StudentLessonScreen';
+import { StudentProgressScreen } from './components/StudentProgressScreen';
+import { ContentManagementArchitecture } from './components/ContentManagementArchitecture';
+import { ChapterManagement } from './components/ChapterManagement';
+import { LessonManagement } from './components/LessonManagement';
 import { AuthModal } from './components/AuthModal';
 import { PremiumUpgradeModal } from './components/PremiumUpgradeModal';
 import { Sparkles } from 'lucide-react';
@@ -27,7 +36,7 @@ import { Sparkles } from 'lucide-react';
 import { analytics } from './lib/analytics';
 
 const AppContent: React.FC = () => {
-  const { activeTab, role } = useAuth();
+  const { activeTab, setActiveTab, role } = useAuth();
   const [isLoadingTab, setIsLoadingTab] = useState(false);
 
   // Trigger micro loading bar & analytics track on activeTab change
@@ -72,6 +81,30 @@ const AppContent: React.FC = () => {
         return <Gamification />;
       case 'settings':
         return <SettingsComponent />;
+      case 'career':
+        return <CareerHub />;
+      case 'marketing':
+        return <MarketingHub />;
+      case 'architecture':
+        return <SystemArchitecture onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'curriculum':
+        return <CurriculumHierarchy onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'student-lesson':
+      case 'lesson':
+        return <StudentLessonScreen />;
+      case 'student-progress':
+      case 'progress':
+        return <StudentProgressScreen />;
+      case 'content-management':
+      case 'cms':
+      case 'architecture-flow':
+        return <ContentManagementArchitecture onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'chapter-management':
+      case 'chapters':
+        return <ChapterManagement onNavigateToLessons={() => setActiveTab('lesson-management')} />;
+      case 'lesson-management':
+      case 'lessons':
+        return <LessonManagement />;
       case 'dashboard':
       default:
         if (role === 'teacher') return <TeacherDashboard />;

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
+import { getLanguageInfo } from '../utils/translations';
 
 interface LessonSlide {
   title: string;
@@ -364,7 +365,7 @@ export const VoiceClassroom: React.FC = () => {
             if (firstSlideSpeech) {
               const utterance = new SpeechSynthesisUtterance(firstSlideSpeech);
               utterance.rate = playbackRate;
-              utterance.lang = language === 'Telugu' ? 'te-IN' : selectedAccent;
+              utterance.lang = getLanguageInfo(language).speechCode;
               setIsPlaying(true);
               synthRef.current.speak(utterance);
             }
@@ -394,7 +395,7 @@ export const VoiceClassroom: React.FC = () => {
     utterance.rate = playbackRate;
     
     // Set voice language accent
-    utterance.lang = selectedClass.language === 'Telugu' ? 'te-IN' : selectedAccent;
+    utterance.lang = getLanguageInfo(language).speechCode;
 
     // Pick best voice if available
     const voices = synthRef.current.getVoices();

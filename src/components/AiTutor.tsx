@@ -32,6 +32,7 @@ import { useAuth } from '../context/AuthContext';
 import { ChatMessage } from '../types';
 import { PersonalizedStudyPlan } from './PersonalizedStudyPlan';
 import { AdBanner } from './AdBanner';
+import { SUPPORTED_LANGUAGES, getLanguageInfo } from '../utils/translations';
 
 export const AiTutor: React.FC = () => {
   const {
@@ -70,6 +71,10 @@ export const AiTutor: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isLoading]);
 
+  useEffect(() => {
+    setSelectedLang(language);
+  }, [language]);
+
   // Handle Speech-to-Text via Web Speech API if available
   const handleVoiceToggle = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -87,7 +92,7 @@ export const AiTutor: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = selectedLang === 'Telugu' ? 'te-IN' : selectedLang === 'Hindi' ? 'hi-IN' : 'en-US';
+      recognition.lang = getLanguageInfo(selectedLang as any).speechCode;
 
       setIsRecording(true);
 
@@ -122,9 +127,7 @@ export const AiTutor: React.FC = () => {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.replace(/[*#`]/g, ''));
-    if (selectedLang === 'Telugu') utterance.lang = 'te-IN';
-    else if (selectedLang === 'Hindi') utterance.lang = 'hi-IN';
-    else utterance.lang = 'en-US';
+    utterance.lang = getLanguageInfo(selectedLang as any).speechCode;
 
     utterance.onend = () => setIsPlayingAudioId(null);
     utterance.onerror = () => setIsPlayingAudioId(null);
@@ -429,11 +432,13 @@ export const AiTutor: React.FC = () => {
           <select
             value={selectedLang}
             onChange={(e) => setSelectedLang(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none"
+            className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none"
           >
-            <option value="English">🇬🇧 English</option>
-            <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
-            <option value="Hindi">🇮🇳 Hindi (हिंदी)</option>
+            {SUPPORTED_LANGUAGES.map((l) => (
+              <option key={l.id} value={l.id}>
+                🌐 {l.nativeName}
+              </option>
+            ))}
           </select>
 
           {/* Export Notes */}

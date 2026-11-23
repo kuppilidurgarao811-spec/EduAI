@@ -87,7 +87,14 @@ export const CourseLibrary: React.FC = () => {
   const filteredCourses = courses.filter((c) => {
     const matchesLevel =
       c.level === educationLevel ||
-      educationLevel === 'Degree (BSc, BCom, BA, BTech)' ||
+      (educationLevel === 'Primary School' && (c.level === 'Class 1–5' || c.level === 'Primary School')) ||
+      (educationLevel === 'Class 1–5' && (c.level === 'Class 1–5' || c.level === 'Primary School')) ||
+      (educationLevel === 'High School' && (c.level === 'Class 6–10' || c.level === 'High School')) ||
+      (educationLevel === 'Class 6–10' && (c.level === 'Class 6–10' || c.level === 'High School')) ||
+      (educationLevel === 'Intermediate' && (c.level === 'Intermediate (11–12)' || c.level === 'Intermediate')) ||
+      (educationLevel === 'Intermediate (11–12)' && (c.level === 'Intermediate (11–12)' || c.level === 'Intermediate')) ||
+      (educationLevel === 'Degree' && (c.level === 'Degree (BSc, BCom, BA, BTech)' || c.level === 'Degree')) ||
+      (educationLevel === 'Degree (BSc, BCom, BA, BTech)' && (c.level === 'Degree (BSc, BCom, BA, BTech)' || c.level === 'Degree')) ||
       c.subject.toLowerCase().includes('programming');
     const matchesSubject =
       selectedSubject === 'All' ||

@@ -17,6 +17,12 @@ import {
   WifiOff,
   ShieldAlert,
   Sparkles,
+  Briefcase,
+  Share2,
+  Layers,
+  Smartphone,
+  BarChart3,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -61,6 +67,7 @@ export const Sidebar: React.FC = () => {
         {
           title: 'Platform Services',
           items: [
+            { id: 'marketing', label: 'Marketing & ASO Hub', icon: Share2, badge: 'GROWTH' },
             { id: 'community', label: 'Community Forum', icon: Users, badge: 'FORUM' },
             { id: 'admin_panel', label: 'Admin Panel', icon: ShieldAlert, badge: 'ADMIN' },
             { id: 'settings', label: 'Settings', icon: Settings, badge: 'PREFS' },
@@ -75,6 +82,9 @@ export const Sidebar: React.FC = () => {
           title: 'Admin Operations',
           items: [
             { id: 'admin_panel', label: 'Admin Control Center', icon: ShieldAlert, badge: 'ADMIN' },
+            { id: 'chapter-management', label: 'Chapter Management', icon: Layers, badge: 'NEW' },
+            { id: 'lesson-management', label: 'Lesson Management', icon: FileText, badge: 'NEW' },
+            { id: 'content-management', label: '13. Content Architecture', icon: Layers, badge: 'PIPELINE' },
             { id: 'admin-dashboard', label: 'Admin Analytics', icon: LayoutDashboard },
             { id: 'courses', label: 'Course Catalog', icon: BookOpen },
           ],
@@ -82,6 +92,7 @@ export const Sidebar: React.FC = () => {
         {
           title: 'Platform Tools',
           items: [
+            { id: 'marketing', label: 'Marketing & Growth Suite', icon: Share2, badge: 'GROWTH' },
             { id: 'community', label: 'Community Forum', icon: Users, badge: 'FORUM' },
             { id: 'ai-tools', label: 'AI Tools Overview', icon: Wrench },
             { id: 'gamification', label: 'Platform Leaderboard', icon: Trophy },
@@ -97,8 +108,12 @@ export const Sidebar: React.FC = () => {
         title: 'Core Learning',
         items: [
           { id: 'dashboard', label: 'Student Dashboard', icon: LayoutDashboard },
+          { id: 'student-lesson', label: '10. Student Lesson', icon: BookOpen, badge: 'ACTIVE' },
+          { id: 'student-progress', label: '11. Student Progress', icon: BarChart3, badge: '68%' },
+          { id: 'curriculum', label: 'Curriculum & Hierarchy', icon: GraduationCap, badge: 'LKG-DEGREE' },
           { id: 'courses', label: 'Courses (LKG to Degree)', icon: BookOpen },
           { id: 'study-materials', label: 'Study Materials & PDFs', icon: BookCheck, badge: 'PDF & PYQ' },
+          { id: 'career', label: 'Career & Placement Hub', icon: Briefcase, badge: 'JOBS & ATS' },
         ],
       },
       {
@@ -119,8 +134,11 @@ export const Sidebar: React.FC = () => {
         ],
       },
       {
-        title: 'Community & Admin',
+        title: 'Growth & Community',
         items: [
+          { id: 'content-management', label: '13. Content Architecture', icon: Layers, badge: 'PIPELINE' },
+          { id: 'marketing', label: 'Invite Friends & Growth', icon: Share2, badge: 'REWARDS' },
+          { id: 'architecture', label: 'System Topology & Flow', icon: Layers, badge: 'MAP' },
           { id: 'community', label: 'Community Forum', icon: Users, badge: 'FORUM' },
           { id: 'admin_panel', label: 'Admin Panel', icon: ShieldAlert, badge: 'ADMIN' },
           { id: 'settings', label: 'Settings', icon: Settings, badge: 'PREFS' },

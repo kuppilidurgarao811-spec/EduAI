@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // Video LMS:
+    // Admin-only direct read and MP4 upload/delete (< 200 MB).
+    // Students play videos via backend short-lived authorized URLs after verifying
+    // lesson.isActive == true && lesson.isPublished == true.
+    match /lessons/{subjectId}/{chapterId}/{lessonId}/video/{fileName} {
+
+      allow read: if isAdmin();
+
+      allow create, update: if isAdmin()
+        && request.resource.size < 200 * 1024 * 1024
+        && request.resource.contentType.matches('video/mp4');
+
+      allow delete: if isAdmin();
+    }
+
+    // PDF Handbooks:
+    // Admin-only write/delete; authenticated read.
+    match /lessons/{subjectId}/{chapterId}/{lessonId}/pdf/{fileName} {
+      allow read: if isAuthenticated();
+
+      allow create, update: if isAdmin()
+        && request.resource.size < 50 * 1024 * 1024
+        && (request.resource.contentType.matches('application/pdf')
+            || request.resource.contentType.matches('application/octet-stream'));
+
+      allow delete: if isAdmin();
+    }
+
+    // Default deny catch-all for all other Storage paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

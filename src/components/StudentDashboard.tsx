@@ -21,6 +21,8 @@ import {
   X,
   Clock,
   Filter,
+  Smartphone,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Course, Test, EducationLevel } from '../types';
@@ -263,6 +265,37 @@ export const StudentDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Android App Student Flow Banner */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-800">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950 uppercase tracking-wider">
+                Curriculum Hierarchy
+              </span>
+              <span className="text-xs text-indigo-300 font-bold">LKG to Degree ➔ Classes ➔ Subjects ➔ Lessons</span>
+            </div>
+            <h3 className="text-sm md:text-base font-black text-white mt-1">
+              Interactive 6-Tier Educational Curriculum
+            </h3>
+            <p className="text-xs text-slate-300">
+              Drill down sequentially from Education Level (LKG/School/Intermediate/Degree) to Subject & Lessons.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setActiveTab('curriculum')}
+          className="w-full md:w-auto px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shrink-0 shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Explore Curriculum</span>
+          <ArrowRight className="w-4 h-4 text-slate-950" />
+        </button>
+      </div>
+
       {/* 2. Global Search Bar */}
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 shadow-sm space-y-2">
         <div className="flex items-center gap-2">
@@ -371,6 +404,89 @@ export const StudentDashboard: React.FC = () => {
 
       {/* 4. Continue Learning Section */}
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 shadow-sm space-y-4">
+        {/* Active Lesson Prompt Card */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-emerald-500/10 border border-indigo-200 dark:border-indigo-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+              📖
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-600 text-white">
+                  Active Lesson
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  Machine Learning & Statistics
+                </span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 dark:text-white mt-0.5">
+                Simple Linear Regression (Video, PDF, Audio & Quiz)
+              </h4>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveTab('student-lesson')}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all shrink-0"
+          >
+            <span>Open Student Lesson Screen</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* 11. Student Progress Feature Card */}
+        <div className="p-5 rounded-2xl bg-slate-950 text-white border border-slate-800 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4 font-mono">
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-black uppercase">
+                11. Student Progress
+              </span>
+              <span className="text-xs font-sans font-bold text-slate-300">
+                Machine Learning Curriculum
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1 text-xs">
+              <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                <div className="text-slate-400 text-[11px]">Chapter 1</div>
+                <div className="text-emerald-400 font-bold mt-0.5 flex items-center justify-between">
+                  <span>██████████</span>
+                  <span>100%</span>
+                </div>
+              </div>
+              <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                <div className="text-slate-400 text-[11px]">Chapter 2</div>
+                <div className="text-indigo-400 font-bold mt-0.5 flex items-center justify-between">
+                  <span>███████░░░</span>
+                  <span>70%</span>
+                </div>
+              </div>
+              <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                <div className="text-slate-400 text-[11px]">Chapter 3</div>
+                <div className="text-amber-400 font-bold mt-0.5 flex items-center justify-between">
+                  <span>███░░░░░░░</span>
+                  <span>30%</span>
+                </div>
+              </div>
+              <div className="bg-indigo-950/40 p-2.5 rounded-xl border border-indigo-500/30">
+                <div className="text-indigo-300 text-[11px] font-bold">Overall</div>
+                <div className="text-amber-300 font-bold mt-0.5 flex items-center justify-between">
+                  <span>███████░░░</span>
+                  <span>68%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setActiveTab('student-progress')}
+            className="px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-sans text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer"
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Open Progress View</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <PlayCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />

@@ -1,25 +1,482 @@
 rules_version = '2';
+
 service cloud.firestore {
+
   match /databases/{database}/documents {
-    function isAuthenticated() {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Shared hardened primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
       return request.auth != null;
     }
 
+    // Token-only admin check (safe inside list queries without get()/exists() cost)
+    function isAdminToken() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (request.auth.token.email == 'kuppilidurgarao811@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    // Full admin check for single-doc get and write operations
+    function isAdmin() {
+      return isAdminToken() || (
+        isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // User profile and complete user data (progress, bookmarks, history)
+    // Entity validators (Pillar 2: Validation Blueprints)
+    function isValidLesson(data) {
+      return data.keys().hasAll(['id', 'subjectId', 'chapterId', 'title', 'order', 'isActive', 'isPublished'])
+        && data.keys().hasOnly([
+          'id', 'subjectId', 'chapterId', 'subjectTitle', 'chapterTitle',
+          'title', 'description', 'content', 'order', 'isActive', 'isPublished',
+          'status', 'estimatedMinutes', 'pdfUrl', 'pdfPath', 'pdfStoragePath',
+          'pdfName', 'pdfSize', 'pdfPagesCount', 'videoUrl', 'videoPath',
+          'videoStoragePath', 'videoName', 'videoDuration', 'thumbnailUrl',
+          'thumbnailStoragePath', 'hasQuiz', 'quizId', 'quizTitle',
+          'quizQuestionsCount', 'authorEmail', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.id)
+        && isValidId(data.subjectId)
+        && isValidId(data.chapterId)
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 250
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && (!('content' in data) || (data.content is string && data.content.size() <= 50000))
+        && data.order is number
+        && data.isActive is bool
+        && data.isPublished is bool
+        && (!('pdfUrl' in data) || data.pdfUrl == null || (data.pdfUrl is string && data.pdfUrl.size() <= 2048))
+        && (!('pdfPath' in data) || data.pdfPath == null || (data.pdfPath is string && data.pdfPath.size() <= 512))
+        && (!('videoUrl' in data) || data.videoUrl == null || (data.videoUrl is string && data.videoUrl.size() <= 2048))
+        && (!('videoPath' in data) || data.videoPath == null || (data.videoPath is string && data.videoPath.size() <= 512))
+        && (!('thumbnailUrl' in data) || data.thumbnailUrl == null || (data.thumbnailUrl is string && data.thumbnailUrl.size() <= 2048))
+        && (!('thumbnailStoragePath' in data) || data.thumbnailStoragePath == null || (data.thumbnailStoragePath is string && data.thumbnailStoragePath.size() <= 512));
+    }
+
+    function isValidChapter(data) {
+      return data.keys().hasAll(['id', 'subjectId', 'title', 'order', 'isActive'])
+        && data.keys().hasOnly([
+          'id', 'subjectId', 'subjectTitle', 'title', 'description',
+          'order', 'isActive', 'lessonsCount', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.id)
+        && isValidId(data.subjectId)
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && data.order is number
+        && data.isActive is bool;
+    }
+
+    function isValidSubject(data) {
+      return data.keys().hasAll(['name', 'isActive'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 150
+        && data.isActive is bool
+        && (!('id' in data) || isValidId(data.id))
+        && (!('description' in data) || (data.description is string && data.description.size() <= 1000));
+    }
+
+    function isValidQuiz(data, quizId) {
+      return data.keys().hasAll([
+          'id', 'subjectId', 'chapterId', 'lessonId', 'title',
+          'totalMarks', 'passMarks', 'durationMinutes', 'isPublished', 'isActive'
+        ])
+        && data.keys().hasOnly([
+          'id', 'subjectId', 'chapterId', 'lessonId',
+          'lessonTitle', 'subjectTitle', 'chapterTitle',
+          'title', 'description',
+          'totalMarks', 'passMarks', 'durationMinutes',
+          'timeLimit', 'passingScore', 'questionsCount',
+          'isPublished', 'isActive', 'createdAt', 'updatedAt'
+        ])
+        && data.id == quizId
+        && isValidId(data.id)
+        && isValidId(data.subjectId)
+        && isValidId(data.chapterId)
+        && isValidId(data.lessonId)
+        && (!('lessonTitle' in data) || (data.lessonTitle is string && data.lessonTitle.size() <= 250))
+        && (!('subjectTitle' in data) || (data.subjectTitle is string && data.subjectTitle.size() <= 150))
+        && (!('chapterTitle' in data) || (data.chapterTitle is string && data.chapterTitle.size() <= 200))
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && data.totalMarks is number && data.totalMarks >= 0 && data.totalMarks <= 10000
+        && data.passMarks is number && data.passMarks >= 0 && data.passMarks <= data.totalMarks
+        && data.durationMinutes is number && data.durationMinutes >= 1 && data.durationMinutes <= 300
+        && (!('timeLimit' in data) || (data.timeLimit is number && data.timeLimit >= 1 && data.timeLimit <= 300))
+        && (!('passingScore' in data) || (data.passingScore is number && data.passingScore >= 0 && data.passingScore <= 100))
+        && (!('questionsCount' in data) || (data.questionsCount is number && data.questionsCount >= 0 && data.questionsCount <= 500))
+        && data.isPublished is bool
+        && data.isActive is bool;
+    }
+
+    // Student-safe question subcollection validator (forbids correctOptionIndex)
+    function isValidQuizSubQuestion(data) {
+      return data.keys().hasAll(['questionText', 'options', 'marks', 'order'])
+        && data.keys().hasOnly([
+          'id', 'questionText', 'options', 'marks', 'order', 'isPublished', 'isActive'
+        ])
+        && (!('id' in data) || isValidId(data.id))
+        && data.questionText is string && data.questionText.size() >= 1 && data.questionText.size() <= 1000
+        && data.options is list && data.options.size() >= 2 && data.options.size() <= 4
+        && data.options[0] is string && data.options[0].size() >= 1 && data.options[0].size() <= 500
+        && data.options[1] is string && data.options[1].size() >= 1 && data.options[1].size() <= 500
+        && (data.options.size() < 3 || (data.options[2] is string && data.options[2].size() <= 500))
+        && (data.options.size() < 4 || (data.options[3] is string && data.options[3].size() <= 500))
+        && data.marks is number && data.marks >= 1 && data.marks <= 100
+        && data.order is number && data.order >= 0 && data.order <= 1000
+        && (!('isPublished' in data) || data.isPublished is bool)
+        && (!('isActive' in data) || data.isActive is bool);
+    }
+
+    // Protected answer keys subcollection validator (admin-only reads/writes)
+    function isValidQuizAnswerKey(data) {
+      return data.keys().hasAll(['correctOptionIndex'])
+        && data.keys().hasOnly(['id', 'correctOptionIndex', 'explanation'])
+        && (!('id' in data) || isValidId(data.id))
+        && data.correctOptionIndex in [0, 1, 2, 3]
+        && (!('explanation' in data) || (data.explanation is string && data.explanation.size() <= 2000));
+    }
+
+    // Legacy quizQuestions & quizResults validators (preserved for backward compatibility)
+    function isValidQuizQuestion(data) {
+      return data.keys().hasAll(['quizId', 'question', 'optionA', 'optionB', 'correctAnswer', 'isPublished'])
+        && data.keys().hasOnly([
+          'id', 'quizId', 'order', 'isPublished', 'question',
+          'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'explanation'
+        ])
+        && (!('id' in data) || isValidId(data.id))
+        && isValidId(data.quizId)
+        && (!('order' in data) || (data.order is number && data.order >= 0 && data.order <= 1000))
+        && data.isPublished is bool
+        && data.question is string && data.question.size() >= 1 && data.question.size() <= 1000
+        && data.optionA is string && data.optionA.size() >= 1 && data.optionA.size() <= 500
+        && data.optionB is string && data.optionB.size() >= 1 && data.optionB.size() <= 500
+        && (!('optionC' in data) || (data.optionC is string && data.optionC.size() <= 500))
+        && (!('optionD' in data) || (data.optionD is string && data.optionD.size() <= 500))
+        && data.correctAnswer in ['A', 'B', 'C', 'D']
+        && (!('explanation' in data) || (data.explanation is string && data.explanation.size() <= 2000));
+    }
+
+    function isValidQuizResult(data, resultId) {
+      return data.keys().hasAll(['id', 'quizId', 'quizTitle', 'userId', 'score', 'totalQuestions', 'percentage', 'passed'])
+        && data.keys().hasOnly([
+          'id', 'quizId', 'lessonId', 'quizTitle', 'userId', 'userName', 'userEmail',
+          'score', 'totalQuestions', 'percentage', 'passingScore', 'passed',
+          'answers', 'timeSpentSeconds', 'submittedAt'
+        ])
+        && data.id == resultId
+        && isValidId(data.id)
+        && isValidId(data.quizId)
+        && (!('lessonId' in data) || data.lessonId == '' || isValidId(data.lessonId))
+        && data.quizTitle is string && data.quizTitle.size() >= 1 && data.quizTitle.size() <= 200
+        && isValidId(data.userId)
+        && (!('userName' in data) || (data.userName is string && data.userName.size() <= 150))
+        && (!('userEmail' in data) || (data.userEmail is string && data.userEmail.size() <= 254))
+        && data.totalQuestions is number && data.totalQuestions >= 1 && data.totalQuestions <= 500
+        && data.score is number && data.score >= 0 && data.score <= data.totalQuestions
+        && data.percentage is number && data.percentage >= 0 && data.percentage <= 100
+        && (!('passingScore' in data) || (data.passingScore is number && data.passingScore >= 0 && data.passingScore <= 100))
+        && data.passed is bool
+        && (!('answers' in data) || (data.answers is map && data.answers.size() <= 500))
+        && (!('timeSpentSeconds' in data) || (data.timeSpentSeconds is number && data.timeSpentSeconds >= 0 && data.timeSpentSeconds <= 86400));
+    }
+
+    function isValidUser(data, userId) {
+      return data.keys().hasAll(['email', 'name', 'role'])
+        && data.keys().hasOnly([
+          'id', 'email', 'name', 'role', 'avatar', 'educationLevel',
+          'streak', 'xp', 'savedBookmarks', 'chatHistory',
+          'downloadedCourses', 'learningProgress', 'createdAt', 'updatedAt'
+        ])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 254
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 150
+        && data.role in ['student', 'teacher', 'parent', 'admin']
+        && (!('id' in data) || data.id == userId)
+        && (!('avatar' in data) || (data.avatar is string && data.avatar.size() <= 1024))
+        && (!('educationLevel' in data) || (data.educationLevel is string && data.educationLevel.size() <= 100));
+    }
+
+    function isValidProgress(data) {
+      return data.keys().hasAll(['userId', 'lessonId', 'completed'])
+        && data.keys().hasOnly([
+          'id', 'progressId', 'userId', 'subjectId', 'chapterId',
+          'lessonId', 'lessonTitle', 'completed', 'percentage', 'completedAt'
+        ])
+        && isValidId(data.userId)
+        && isValidId(data.lessonId)
+        && data.completed is bool
+        && (!('subjectId' in data) || isValidId(data.subjectId))
+        && (!('chapterId' in data) || isValidId(data.chapterId))
+        && (!('percentage' in data) || (data.percentage is number && data.percentage >= 0 && data.percentage <= 100));
+    }
+
+    function isValidCrashReport(data) {
+      return data.keys().size() <= 15
+        && (!('message' in data) || (data.message is string && data.message.size() <= 2000))
+        && (!('userId' in data) || isValidId(data.userId));
+    }
+
+    // Connection check doc used by startup SDK health verification
+    match /test/connection {
+      allow get: if isSignedIn();
+    }
+
+    // Server-managed admin registry
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && (isOwner(adminUid) || isAdmin());
+      allow list: if isAdminToken();
+      allow create, update, delete: if isValidId(adminUid) && isAdmin();
+    }
+
+    // Curriculum collections: authenticated reads, admin-only writes
+    match /educationLevels/{levelId} {
+      allow get: if isSignedIn() && isValidId(levelId);
+      allow list: if isSignedIn();
+      allow create, update, delete: if isValidId(levelId) && isAdmin();
+    }
+
+    match /courses/{courseId} {
+      allow get: if isSignedIn() && isValidId(courseId);
+      allow list: if isSignedIn();
+      allow create, update, delete: if isValidId(courseId) && isAdmin();
+    }
+
+    match /subjects/{subjectId} {
+      allow get: if isSignedIn() && isValidId(subjectId);
+      allow list: if isSignedIn();
+      allow create: if isValidId(subjectId) && isAdmin() && isValidSubject(incoming());
+      allow update: if isValidId(subjectId) && isAdmin() && isValidSubject(incoming());
+      allow delete: if isValidId(subjectId) && isAdmin();
+    }
+
+    match /chapters/{chapterId} {
+      allow get: if isSignedIn() && isValidId(chapterId) && (existing().isActive == true || isAdmin());
+      allow list: if isSignedIn() && (existing().isActive == true || isAdminToken());
+      allow create: if isValidId(chapterId) && isAdmin() && isValidChapter(incoming());
+      allow update: if isValidId(chapterId) && isAdmin() && isValidChapter(incoming());
+      allow delete: if isValidId(chapterId) && isAdmin();
+    }
+
+    // Lessons: Admins manage drafts & published; students can ONLY query active + published lessons
+    match /lessons/{lessonId} {
+      allow get: if isSignedIn() && isValidId(lessonId) && (
+        (existing().isActive == true && existing().isPublished == true) ||
+        isAdmin()
+      );
+
+      // Rules are not filters: student queries MUST include isActive == true && isPublished == true
+      allow list: if isSignedIn() && (
+        (existing().isActive == true && existing().isPublished == true) ||
+        isAdminToken()
+      );
+
+      allow create: if isValidId(lessonId)
+        && isAdmin()
+        && isValidLesson(incoming())
+        && incoming().id == lessonId;
+
+      allow update: if isValidId(lessonId)
+        && isAdmin()
+        && isValidLesson(incoming())
+        && incoming().id == existing().id
+        && incoming().subjectId == existing().subjectId
+        && incoming().chapterId == existing().chapterId;
+
+      allow delete: if isValidId(lessonId) && isAdmin();
+    }
+
+    // Quizzes: Admins manage drafts/inactive/published; students read ONLY published + active quizzes
+    match /quizzes/{quizId} {
+      allow get: if isSignedIn() && isValidId(quizId) && (
+        (existing().isPublished == true && existing().isActive == true) ||
+        isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        (existing().isPublished == true && existing().isActive == true) ||
+        isAdminToken()
+      );
+
+      allow create: if isValidId(quizId) && isAdmin() && isValidQuiz(incoming(), quizId);
+      allow update: if isValidId(quizId) && isAdmin() && isValidQuiz(incoming(), quizId) && incoming().id == existing().id;
+      allow delete: if isValidId(quizId) && isAdmin();
+
+      // Student-safe questions subcollection (NO correctOptionIndex stored here)
+      match /questions/{questionId} {
+        allow get: if isSignedIn() && isValidId(quizId) && isValidId(questionId) && (
+          isAdmin() ||
+          (
+            get(/databases/$(database)/documents/quizzes/$(quizId)).data.isPublished == true &&
+            get(/databases/$(database)/documents/quizzes/$(quizId)).data.isActive == true
+          )
+        );
+
+        // Verify parent quiz publication & active status (constant 1 get() per query on quizId)
+        allow list: if isSignedIn() && isValidId(quizId) && (
+          isAdminToken() ||
+          (
+            get(/databases/$(database)/documents/quizzes/$(quizId)).data.isPublished == true &&
+            get(/databases/$(database)/documents/quizzes/$(quizId)).data.isActive == true
+          )
+        );
+
+        allow create: if isValidId(quizId)
+          && isValidId(questionId)
+          && isAdmin()
+          && isValidQuizSubQuestion(incoming())
+          && existsAfter(/databases/$(database)/documents/quizzes/$(quizId));
+
+        allow update: if isValidId(quizId)
+          && isValidId(questionId)
+          && isAdmin()
+          && isValidQuizSubQuestion(incoming())
+          && existsAfter(/databases/$(database)/documents/quizzes/$(quizId));
+
+        allow delete: if isValidId(quizId) && isValidId(questionId) && isAdmin();
+      }
+
+      // Protected Answer Keys subcollection: STRICTLY admin-only (never readable by students)
+      match /answerKeys/{questionId} {
+        allow get: if isValidId(quizId) && isValidId(questionId) && isAdmin();
+        allow list: if isAdminToken();
+
+        allow create: if isValidId(quizId)
+          && isValidId(questionId)
+          && isAdmin()
+          && isValidQuizAnswerKey(incoming())
+          && existsAfter(/databases/$(database)/documents/quizzes/$(quizId));
+
+        allow update: if isValidId(quizId)
+          && isValidId(questionId)
+          && isAdmin()
+          && isValidQuizAnswerKey(incoming())
+          && existsAfter(/databases/$(database)/documents/quizzes/$(quizId));
+
+        allow delete: if isValidId(quizId) && isValidId(questionId) && isAdmin();
+      }
+    }
+
+    // Student Quiz Attempts: Owner/Admin reads only; written exclusively by trusted submitEduAIQuiz Cloud Function
+    match /quizAttempts/{attemptId} {
+      allow get: if isSignedIn() && isValidId(attemptId) && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isAdminToken());
+
+      // Attempts are written by the trusted Cloud Function, not directly by client apps
+      allow create, update, delete: if false;
+    }
+
+    // Legacy Quiz Questions (preserved for backward compatibility)
+    match /quizQuestions/{questionId} {
+      allow get: if isSignedIn() && isValidId(questionId) && (existing().isPublished == true || isAdmin());
+      allow list: if isSignedIn() && (existing().isPublished == true || isAdminToken());
+      allow create: if isValidId(questionId) && isAdmin() && isValidQuizQuestion(incoming());
+      allow update: if isValidId(questionId) && isAdmin() && isValidQuizQuestion(incoming()) && incoming().quizId == existing().quizId;
+      allow delete: if isValidId(questionId) && isAdmin();
+    }
+
+    // Legacy Quiz Results (preserved for backward compatibility)
+    match /quizResults/{resultId} {
+      allow get: if isSignedIn() && isValidId(resultId) && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isAdminToken());
+      allow create: if isValidId(resultId) && isSignedIn() && isValidQuizResult(incoming(), resultId) && incoming().userId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isValidId(resultId) && isAdmin();
+    }
+
+    // User profiles: PII isolated to owner or admin; prevent self-escalation to admin
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create, update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdminToken();
+
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUser(incoming(), userId)
+        && (incoming().role != 'admin' || isAdmin());
+
+      allow update: if isValidId(userId)
+        && isValidUser(incoming(), userId)
+        && (
+          isAdmin() || (
+            isOwner(userId)
+            && incoming().role == existing().role
+            && incoming().email == existing().email
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'id', 'name', 'avatar', 'educationLevel', 'streak', 'xp',
+              'savedBookmarks', 'chatHistory', 'downloadedCourses',
+              'learningProgress', 'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
     }
 
-    // Default authenticated access for other collections (e.g. forums, public materials)
-    match /{document=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+    // Student learning progress: strictly scoped to owning userId
+    match /progress/{progressId} {
+      allow get: if isValidId(progressId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isAdminToken());
+      allow create: if isValidId(progressId) && isSignedIn() && isValidProgress(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isValidId(progressId) && isSignedIn() && isValidProgress(incoming()) && (
+        isAdmin() || (
+          existing().userId == request.auth.uid
+          && incoming().userId == existing().userId
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'id', 'progressId', 'subjectId', 'chapterId', 'lessonId',
+            'lessonTitle', 'completed', 'percentage', 'completedAt'
+          ])
+        )
+      );
+      allow delete: if isValidId(progressId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+    }
+
+    match /user_progress/{progressId} {
+      allow get: if isValidId(progressId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isAdminToken());
+      allow create: if isValidId(progressId) && isSignedIn() && isValidProgress(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isValidId(progressId) && isSignedIn() && isValidProgress(incoming()) && (
+        isAdmin() || (
+          existing().userId == request.auth.uid
+          && incoming().userId == existing().userId
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'id', 'progressId', 'subjectId', 'chapterId', 'lessonId',
+            'lessonTitle', 'completed', 'percentage', 'completedAt'
+          ])
+        )
+      );
+      allow delete: if isValidId(progressId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+    }
+
+    match /analytics/{docId} {
+      allow get: if isValidId(docId) && isAdmin();
+      allow create, update: if isValidId(docId) && isSignedIn() && incoming().keys().size() <= 30;
+      allow delete: if isValidId(docId) && isAdmin();
+    }
+
+    match /crash_reports/{reportId} {
+      allow get: if isValidId(reportId) && isAdmin();
+      allow list: if isAdminToken();
+      allow create: if isValidId(reportId) && isSignedIn() && isValidCrashReport(incoming());
+      allow update, delete: if isValidId(reportId) && isAdmin();
     }
   }
 }

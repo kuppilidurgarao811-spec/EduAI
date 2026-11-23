@@ -1,63 +1,347 @@
 {
   "entities": {
-    "users": {
-      "title": "User Profiles & Complete Learning Data",
-      "description": "User profile, learning progress, quiz scores, bookmarks, chat history, and downloaded courses stored by auth UID",
+    "educationLevels": {
+      "title": "Education Levels",
+      "description": "Defines educational tiers (e.g. Early Childhood, School, Intermediate, Degree)",
+      "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "email": { "type": "string" },
-        "mobile": { "type": "string" },
-        "role": { "type": "string" },
-        "avatar": { "type": "string" },
-        "educationLevel": { "type": "string" },
-        "streak": { "type": "number" },
-        "xp": { "type": "number" },
-        "savedBookmarks": { "type": "array", "items": { "type": "string" } },
-        "learningProgress": {
-          "type": "object",
-          "properties": {
-            "completedModules": { "type": "array", "items": { "type": "string" } },
-            "studyPlans": { "type": "array" }
-          }
-        },
-        "quizScores": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "testId": { "type": "string" },
-              "score": { "type": "number" },
-              "date": { "type": "string" }
-            }
-          }
-        },
-        "chatHistory": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "role": { "type": "string" },
-              "text": { "type": "string" },
-              "timestamp": { "type": "string" }
-            }
-          }
-        },
-        "downloadedCourses": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "title": { "type": "string" },
-              "type": { "type": "string" },
-              "size": { "type": "string" }
-            }
-          }
-        }
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "type": { "type": "string", "maxLength": 80 },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" }
       },
-      "required": ["id", "email", "name", "role"]
+      "required": ["name", "order", "isActive"]
+    },
+    "courses": {
+      "title": "Educational Courses / Streams",
+      "description": "Defines streams or grade categories within an education level (e.g. MPC, BiPC, B.Sc)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "levelId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["levelId", "name", "isActive"]
+    },
+    "subjects": {
+      "title": "Educational Subjects",
+      "description": "Stores subjects mapped to level, course, class name, and semester",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "levelId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "courseId": { "type": "string", "maxLength": 128 },
+        "className": { "type": "string", "maxLength": 100 },
+        "semester": { "type": "string", "maxLength": 60 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "iconUrl": { "type": "string", "maxLength": 1024 },
+        "language": { "type": "string", "maxLength": 60 },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["name", "levelId", "isActive"]
+    },
+    "chapters": {
+      "title": "Subject Chapters",
+      "description": "Chapters belonging to a specific subject with order, active state, and createdAt timestamp",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subjectId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "subjectId", "title", "order", "isActive"]
+    },
+    "lessons": {
+      "title": "Subject Chapter Lessons",
+      "description": "Educational lessons under a subject chapter with draft, active, and published status, plus PDF and Video storage references",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subjectId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "chapterId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 250 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "content": { "type": "string", "maxLength": 50000 },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "pdfUrl": { "type": "string", "maxLength": 2048 },
+        "pdfPath": { "type": "string", "maxLength": 512 },
+        "videoUrl": { "type": "string", "maxLength": 2048 },
+        "videoPath": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "subjectId", "chapterId", "title", "description", "content", "order", "isActive", "isPublished"]
+    },
+    "quizzes": {
+      "title": "Lesson Quizzes",
+      "description": "Quizzes associated with a subject, chapter, and lesson including marks, pass threshold, duration, publish status, and active flag",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subjectId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "chapterId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonTitle": { "type": "string", "maxLength": 250 },
+        "subjectTitle": { "type": "string", "maxLength": 150 },
+        "chapterTitle": { "type": "string", "maxLength": 200 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "totalMarks": { "type": "number" },
+        "passMarks": { "type": "number" },
+        "durationMinutes": { "type": "number" },
+        "timeLimit": { "type": "number" },
+        "passingScore": { "type": "number" },
+        "questionsCount": { "type": "number" },
+        "isPublished": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "subjectId", "chapterId", "lessonId", "title", "totalMarks", "passMarks", "durationMinutes", "isPublished", "isActive"]
+    },
+    "quizSubQuestions": {
+      "title": "Quiz Question Items (Student-Safe)",
+      "description": "Student-facing question documents under quizzes/{quizId}/questions containing questionText, options, marks, and order without correct answers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "questionText": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "options": { "type": "array", "description": "2 to 4 multiple-choice option strings" },
+        "marks": { "type": "number" },
+        "order": { "type": "number" },
+        "isPublished": { "type": "boolean" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["questionText", "options", "marks", "order", "isPublished", "isActive"]
+    },
+    "quizAnswerKeys": {
+      "title": "Quiz Answer Keys (Protected)",
+      "description": "Protected answer key documents under quizzes/{quizId}/answerKeys storing correctOptionIndex separately from student questions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "correctOptionIndex": { "type": "number", "enum": [0, 1, 2, 3] },
+        "explanation": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["correctOptionIndex"]
+    },
+    "quizAttempts": {
+      "title": "Student Quiz Attempts",
+      "description": "Graded student quiz attempts storing quizId, userId, score, totalMarks, percentage, passed, and submittedAt",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "quizId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subjectId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "chapterId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "quizTitle": { "type": "string", "maxLength": 200 },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userName": { "type": "string", "maxLength": 150 },
+        "userEmail": { "type": "string", "maxLength": 254 },
+        "score": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "passMarks": { "type": "number" },
+        "percentage": { "type": "number" },
+        "passed": { "type": "boolean" },
+        "answers": { "type": "object" },
+        "graded": { "type": "boolean" },
+        "timeSpentSeconds": { "type": "number" },
+        "submittedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["quizId", "userId", "score", "totalMarks", "percentage", "passed"]
+    },
+    "quizQuestions": {
+      "title": "Quiz Questions",
+      "description": "Individual questions belonging to a quiz with options A, B, C, D, correct answer, explanation, and publish sync flag",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "quizId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "order": { "type": "number" },
+        "isPublished": { "type": "boolean" },
+        "question": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "optionA": { "type": "string", "maxLength": 500 },
+        "optionB": { "type": "string", "maxLength": 500 },
+        "optionC": { "type": "string", "maxLength": 500 },
+        "optionD": { "type": "string", "maxLength": 500 },
+        "correctAnswer": { "type": "string", "enum": ["A", "B", "C", "D"] },
+        "explanation": { "type": "string", "maxLength": 2000 }
+      },
+      "required": ["quizId", "question", "optionA", "optionB", "correctAnswer", "isPublished"]
+    },
+    "quizResults": {
+      "title": "Student Quiz Results",
+      "description": "Automatically graded student quiz attempts and marks persisted per user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "quizId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "quizTitle": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userName": { "type": "string", "maxLength": 150 },
+        "userEmail": { "type": "string", "maxLength": 254 },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "percentage": { "type": "number" },
+        "passingScore": { "type": "number" },
+        "passed": { "type": "boolean" },
+        "answers": { "type": "object" },
+        "timeSpentSeconds": { "type": "number" },
+        "submittedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "quizId", "quizTitle", "userId", "score", "totalQuestions", "percentage", "passed"]
+    },
+    "users": {
+      "title": "User Profiles",
+      "description": "Registered students, teachers, parents, and admins",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "email": { "type": "string", "format": "email", "maxLength": 254 },
+        "role": { "type": "string", "enum": ["student", "teacher", "parent", "admin"] },
+        "educationLevel": { "type": "string", "maxLength": 80 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["email", "name", "role"]
+    },
+    "admins": {
+      "title": "Admin Registry",
+      "description": "Server-managed registry of authorized admin UIDs",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 254 },
+        "grantedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid"]
+    },
+    "progress": {
+      "title": "User Learning Progress",
+      "description": "Tracks completed lessons and percentage progress for each student",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subjectId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "chapterId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "completed": { "type": "boolean" },
+        "percentage": { "type": "number" },
+        "completedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["userId", "subjectId", "chapterId", "lessonId", "completed", "percentage"]
+    },
+    "user_progress": {
+      "title": "Auxiliary User Progress",
+      "description": "Legacy progress tracking document keyed by userId_lessonId",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lessonTitle": { "type": "string", "maxLength": 250 },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["userId", "lessonId", "completed"]
+    },
+    "analytics": {
+      "title": "Feature Usage Analytics",
+      "description": "Aggregated feature usage counters",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      }
+    },
+    "crash_reports": {
+      "title": "Crash Reports",
+      "description": "Client diagnostic crash reports",
+      "type": "object",
+      "properties": {
+        "message": { "type": "string", "maxLength": 2000 },
+        "userId": { "type": "string", "maxLength": 128 }
+      }
+    }
+  },
+  "firestore": {
+    "/educationLevels/{levelId}": {
+      "schema": { "$ref": "#/entities/educationLevels" },
+      "description": "Education levels collection"
+    },
+    "/courses/{courseId}": {
+      "schema": { "$ref": "#/entities/courses" },
+      "description": "Courses collection"
+    },
+    "/subjects/{subjectId}": {
+      "schema": { "$ref": "#/entities/subjects" },
+      "description": "Subjects collection"
+    },
+    "/chapters/{chapterId}": {
+      "schema": { "$ref": "#/entities/chapters" },
+      "description": "Chapters collection"
+    },
+    "/lessons/{lessonId}": {
+      "schema": { "$ref": "#/entities/lessons" },
+      "description": "Lessons collection"
+    },
+    "/quizzes/{quizId}": {
+      "schema": { "$ref": "#/entities/quizzes" },
+      "description": "Quizzes collection with totalMarks, passMarks, durationMinutes, isPublished, and isActive"
+    },
+    "/quizzes/{quizId}/questions/{questionId}": {
+      "schema": { "$ref": "#/entities/quizSubQuestions" },
+      "description": "Student-safe quiz questions subcollection (excludes correctOptionIndex)"
+    },
+    "/quizzes/{quizId}/answerKeys/{questionId}": {
+      "schema": { "$ref": "#/entities/quizAnswerKeys" },
+      "description": "Protected answer keys subcollection storing correctOptionIndex separately"
+    },
+    "/quizAttempts/{attemptId}": {
+      "schema": { "$ref": "#/entities/quizAttempts" },
+      "description": "Student quiz attempts collection storing score, totalMarks, percentage, passed, and submittedAt"
+    },
+    "/quizQuestions/{questionId}": {
+      "schema": { "$ref": "#/entities/quizQuestions" },
+      "description": "Legacy flat quiz questions collection"
+    },
+    "/quizResults/{resultId}": {
+      "schema": { "$ref": "#/entities/quizResults" },
+      "description": "Legacy quiz results collection"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/users" },
+      "description": "User profiles collection"
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/admins" },
+      "description": "Admin UIDs registry"
+    },
+    "/progress/{progressId}": {
+      "schema": { "$ref": "#/entities/progress" },
+      "description": "Student lesson progress tracking"
+    },
+    "/user_progress/{progressId}": {
+      "schema": { "$ref": "#/entities/user_progress" },
+      "description": "Auxiliary student lesson progress tracking"
+    },
+    "/analytics/{docId}": {
+      "schema": { "$ref": "#/entities/analytics" },
+      "description": "Feature usage analytics"
+    },
+    "/crash_reports/{reportId}": {
+      "schema": { "$ref": "#/entities/crash_reports" },
+      "description": "Client crash reports"
     }
   }
 }

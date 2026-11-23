@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Language, FontSize } from '../types';
+import { SUPPORTED_LANGUAGES, getLanguageInfo } from '../utils/translations';
 
 export const SettingsComponent: React.FC = () => {
   const {
@@ -187,58 +188,67 @@ export const SettingsComponent: React.FC = () => {
         {/* 2. LANGUAGE SELECTION SECTION */}
         {(activeSection === 'all' || activeSection === 'language') && (
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                <Languages className="w-5 h-5" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                  <Languages className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
+                    Regional Language Preference (12 Supported)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Select your primary language for AI explanations, voice classes, and lesson notes
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">
-                  Language Preference
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select your primary language for AI explanations & lessons
-                </p>
-              </div>
+
+              <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-xs font-black border border-indigo-200 dark:border-indigo-800 hidden sm:block">
+                Active: {getLanguageInfo(language).nativeName}
+              </span>
             </div>
 
-            <div className="space-y-2 pt-1">
-              {[
-                { id: 'English', native: 'English', desc: 'Standard AI Explanations, Math & Coding' },
-                { id: 'Telugu', native: 'తెలుగు (Telugu)', desc: 'తెలుగులో సైన్స్, గణితం వివరణలు మరియు అనువాదాలు' },
-                { id: 'Hindi', native: 'हिंदी (Hindi)', desc: 'हिंदी में विस्तृत उत्तर, प्रश्नोत्तर एवं नोट्स' },
-              ].map((langItem) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 max-h-96 overflow-y-auto p-1">
+              {SUPPORTED_LANGUAGES.map((langItem) => {
                 const isSelected = language === langItem.id;
                 return (
                   <button
                     key={langItem.id}
                     type="button"
                     onClick={() => {
-                      setLanguage(langItem.id as Language);
-                      triggerToast(`Language changed to ${langItem.native}!`);
+                      setLanguage(langItem.id);
+                      triggerToast(`Language changed to ${langItem.nativeName}!`);
                     }}
-                    className={`w-full p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between ${
+                    className={`p-3.5 rounded-2xl text-left border transition-all flex items-center justify-between ${
                       isSelected
-                        ? 'bg-blue-50 dark:bg-blue-950/50 border-blue-600 dark:border-blue-500 text-blue-950 dark:text-blue-200 ring-2 ring-blue-500/30'
+                        ? 'bg-blue-50 dark:bg-blue-950/50 border-blue-600 dark:border-blue-500 text-blue-950 dark:text-blue-200 ring-2 ring-blue-500/30 shadow-sm'
                         : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
-                    <div>
-                      <div className="font-extrabold text-xs text-slate-800 dark:text-slate-100">{langItem.native}</div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{langItem.desc}</div>
+                    <div className="space-y-0.5">
+                      <div className="font-black text-xs text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                        <span>{langItem.nativeName}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{langItem.description}</div>
                     </div>
-                    {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />}
+                    {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />}
                   </button>
                 );
               })}
             </div>
 
             {/* Language Live Preview Box */}
-            <div className="p-3.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-xs">
-              <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 block mb-1">
-                Sample Live AI Response Output:
-              </span>
-              <p className="font-medium text-slate-700 dark:text-slate-300 italic">
-                "{sampleTexts[language] || sampleTexts['English']}"
+            <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-xs space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase text-indigo-700 dark:text-indigo-300">
+                  Live AI Output Sample ({getLanguageInfo(language).label}):
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">
+                  Voice Speech Code: {getLanguageInfo(language).speechCode}
+                </span>
+              </div>
+              <p className="font-semibold text-slate-800 dark:text-slate-200 text-xs leading-relaxed">
+                "{getLanguageInfo(language).sampleText}"
               </p>
             </div>
           </div>
